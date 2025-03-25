@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسام احترافي</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333;
+            margin: 0;
+            position: relative;
+            overflow: hidden; /* منع المحتوى من التحرك */
+        }
+
+        header {
+            width: 100%;
+            background-color: #000;
+            color: #fff;
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end; /* الأزرار اليمنى */
+            margin-right: 20px;
+        }
+
+        .left-button-container {
+            display: flex;
+            justify-content: flex-start; /* الأزرار اليسرى */
+            margin-left: 20px;
+            position: absolute;
+            left: 20px; /* تحديد المسافة من الجهة اليسرى */
+        }
+
+        .smooth-button {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 30px;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 10px rgba(173, 216, 230, 0.5), 0 0 20px rgba(135, 206, 250, 0.7);
+            cursor: pointer;
+            position: relative;
+            margin-left: 10px;
+        }
+
+        .smooth-button:hover {
+            background: linear-gradient(45deg, #87CEFA, #4682B4);
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -250px; /* يتم إخفاؤه أولًا */
+            width: 250px;
+            height: 100vh;
+            background-color: #ff69b4; /* لون زهري */
+            transition: left 0.3s;
+            padding: 15px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1004; /* يظهر فوق المحتوى */
+        }
+
+        .side-menu.show {
+            left: 0; /* يظهر عند إضافة هذه الفئة */
+        }
+
+        .news-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ff69b4; /* لون زهري */
+            border: 2px solid #fff;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            z-index: 1005;
+            text-align: center;
+            width: 300px;
+        }
+
+        .record-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #444;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+            z-index: 1001;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .recording-time {
+            color: #fff;
+            font-size: 28px;
+            margin: 10px 0;
+        }
+
+        .audio-container {
+            background-color: #555;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            max-width: 400px;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 150px;
+            overflow-y: auto;
+        }
+
+        .audio-item {
+            margin: 5px 0;
+        }
+
+        audio {
+            width: 100%;
+        }
+
+        .welcome-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffd700; /* لون ذهبي */
+            border: 2px solid #000;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1003;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-out, transform 1s ease-out; /* إضافة تأثير تحرك */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7); /* ظل أسود */
+        }
+        
+        .welcome-popup h2 {
+            color: #8B0000; /* لون أسود مائل للون الأحمر */
+            margin: 0;
+        }
+
+        .news-container {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #fff;
+            color: #000;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .menu-button {
+            background: lightblue;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="left-button-container">
+            <button class="menu-button" id="menuBtn" onclick="toggleMenu()">...</button> <!-- زر ... -->
+        </div>
+        <div class="button-container">
+            <button class="smooth-button" onclick="location.href='records.html'">سجل</button>
+            <button class="smooth-button" onclick="location.href='chat.html'">دردشة فلسطينية</button>
+            <button class="smooth-button">سام</button>
+            <button class="smooth-button" onclick="location.href='login.html'">رجوع</button>
+            <button class="smooth-button" id="mic-btn" onclick="startRecording()">🎙️</button>
+        </div>
+    </header>
+
+    <!-- الشريط الجانبي -->
+    <div class="side-menu" id="sideMenu">
+        <h3>القائمة</h3>
+        <button class="smooth-button" id="newsBtn" onclick="toggleNewsPopup()">أخبار</button>
+        <button class="smooth-button" onclick="toggleMenu()">خروج</button>
+    </div>
+
+    <div class="news-popup" id="newsPopup">
+        <button class="smooth-button" id="closeNewsBtn" onclick="toggleNewsPopup()" style="position: absolute; top: 10px; right: 10px; background-color: red;">X</button>
+        <h3>نشر خبر</h3>
+        <textarea id="newsContent" rows="4" style="width: 100%; border-radius: 5px;"></textarea>
+        <button class="smooth-button" id="saveNewsBtn" onclick="saveNews()">حفظ</button>
+        <div class="news-container" id="newsContainer"></div>
+    </div>
+
+    <div class="audio-container" id="audioContainer" style="display: none;">
+        <h4>الرسائل الصوتية:</h4>
+    </div>
+
+    <!-- نافذة تسجيل الصوت -->
+    <div class="record-popup" id="recordPopup">
+        <div class="recording-time" id="recordingTime">0:00</div>
+        <button class="smooth-button" id="sendRecordingBtn" onclick="sendRecording()">إرسال</button>
+        <button class="smooth-button" id="cancelRecordingBtn" onclick="cancelRecording()">إلغاء</button>
+    </div>
+
+    <!-- نافذة الترحيب -->
+    <div class="welcome-popup" id="welcomePopup"> 
+        <h2>مرحبا بك، Master</h2> 
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingInterval;
+        let recordingTime = 0;
+
+        async function startRecording() {
+            let constraints = { audio: true };
+            let stream;
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                mediaRecorder = new MediaRecorder(stream);
+
+                audioChunks = []; // إعادة تعيين المصفوفة قبل كل تسجيل
+                recordingTime = 0;
+
+                mediaRecorder.ondataavailable = function(event) {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = function() {
+                    clearInterval(recordingInterval);
+                };
+
+                mediaRecorder.start();
+                recordPopup.style.display = 'block';
+                document.getElementById('recordingTime').textContent = '0:00';
+
+                recordingInterval = setInterval(() => {
+                    recordingTime++;
+                    const minutes = Math.floor(recordingTime / 60);
+                    const seconds = recordingTime % 60;
+                    document.getElementById('recordingTime').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }, 1000);
+            } catch (error) {
+                console.error('Error accessing the microphone:', error);
+                alert('تعذر الوصول إلى الميكروفون: ' + error.message);
+            }
+        }
+
+        function sendRecording() {
+            if (audioChunks.length === 0) return; // لا يوجد شيء لإرساله
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioElement = document.createElement('audio');
+            audioElement.src = audioUrl;
+            audioElement.controls = true;
+            audioElement.className = 'audio-item';
+
+            const audioContainer = document.getElementById('audioContainer');
+            audioContainer.appendChild(audioElement);
+            audioContainer.style.display = 'block'; // عرض صندوق الصوتيات عند إرسال الرسالة
+            recordPopup.style.display = 'none'; // إخفاء نافذة التسجيل بعد الإرسال
+
+            // إخفاء صندوق الصوتيات بعد 10 ثوان
+            setTimeout(() => {
+                audioContainer.style.display = 'none';
+            }, 10000);
+        }
+
+        function cancelRecording() {
+            mediaRecorder.stop();
+            clearInterval(recordingInterval);
+            recordPopup.style.display = 'none'; // إخفاء نافذة التسجيل
+        }
+
+        // التحقق من اسم المستخدم وإظهار رسالة الترحيب
+        function checkUserName(userName) {
+            if (userName === 'master') {
+                const welcomePopup = document.getElementById('welcomePopup');
+                welcomePopup.style.display = 'block';
+                welcomePopup.style.opacity = 1;
+
+                // تحريك الصندوق للأعلى ثم إخفائه
+                setTimeout(() => {
+                    welcomePopup.style.transform = 'translate(-50%, -60%)'; // يتحرك للأعلى
+                    setTimeout(() => {
+                        welcomePopup.style.opacity = 0;
+                        setTimeout(() => {
+                            welcomePopup.style.display = 'none';
+                            welcomePopup.style.transform = 'translate(-50%, -50%)'; // إعادة الوضع الأصلي
+                        }, 1000); // التأخير حتى ينتهي تأثير الاختفاء
+                    }, 800); // التأخير قبل الإخفاء
+                }, 10000); // عرض الرسالة لمدة 10 ثواني
+            }
+        }
+
+        // استدعاء الدالة مع اسم المستخدم
+        // يتم استبداله بإجراء تسجيل الدخول الفعلي
+        checkUserName('master'); // يمكنك تغيير الاسم لاختبار الحالة
+
+        // إضافة تسجيل الأحداث
+        document.addEventListener('click', logClick);
+        document.addEventListener('scroll', logScroll);
+        document.addEventListener('input', logInputChange);
+
+        function logClick(event) {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `ضغطت في [${event.clientX}, ${event.clientY}] في: ${dateTime}`;
+            saveToActiveRecord(record);
+        }
+
+        function logScroll() {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `تم التمرير في الصفحة في: ${dateTime}`;
+            saveToActiveRecord(record);
+        }
+
+        function logInputChange(event) {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `تم تغيير حقل الإدخال: "${event.target.value}" في: ${dateTime}`;
+            saveToActiveRecord(record);
+        }
+
+        function saveToActiveRecord(record) {
+            let activeRecords = JSON.parse(localStorage.getItem('activeRecordList')) || [];
+            activeRecords.push(record);
+            localStorage.setItem('activeRecordList', JSON.stringify(activeRecords));
+        }
+
+        // وظائف قائمة الأخبار
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            menu.classList.toggle('show'); // عكس حالة الظهور
+        }
+
+        function toggleNewsPopup() {
+            const popup = document.getElementById('newsPopup');
+            popup.style.display = (popup.style.display === 'none' || popup.style.display === '') ? 'block' : 'none';
+        }
+
+        function saveNews() {
+            const newsContent = document.getElementById('newsContent').value;
+            if (newsContent.trim() === '') return;
+
+            const newsContainer = document.getElementById('newsContainer');
+            const newsEntry = document.createElement('div');
+            newsEntry.textContent = newsContent;
+
+            newsContainer.appendChild(newsEntry);
+            document.getElementById('newsContent').value = ''; // إفراغ TextArea
+
+            saveNewsToLocal(newsContent);
+        }
+
+        function saveNewsToLocal(news) {
+            let newsList = JSON.parse(localStorage.getItem('newsList')) || [];
+            newsList.push(news);
+            localStorage.setItem('newsList', JSON.stringify(newsList));
+        }
+
+        function loadNewsFromLocal() {
+            let newsList = JSON.parse(localStorage.getItem('newsList')) || [];
+            const newsContainer = document.getElementById('newsContainer');
+            newsList.forEach(news => {
+                const newsEntry = document.createElement('div');
+                newsEntry.textContent = news;
+                newsContainer.appendChild(newsEntry);
+            });
+        }
+
+        // تحميل الأخبار عند فتح الصفحة
+        window.onload = loadNewsFromLocal;
+    </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px; /* ارتفاع الشريط */
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            padding: 0 10px; /* padding أقل للمحتوى */
+        }
+
+        .button-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 5px 10px; /* تقليل الحواف الداخلية */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+            margin-left: 10px; /* إضافة مسافة يسارية للزر */
+        }
+
+        .button-container:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-button {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 16px; /* تقليل حجم الخط */
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            z-index: 1;
+            padding: 5px 10px; /* تقليل مساحة الزر */
+        }
+
+        .info-button:hover {
+            background-color: rgba(0, 0, 255, 0.3);
+        }
+
+        .info-button:active {
+            background-color: rgba(0, 0, 255, 0.5);
+        }
+
+        .header {
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-size: 30px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"], .login-button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        input[type="text"]:focus {
+            background-color: #e8f0fe;
+            outline: none;
+            box-shadow: 0 0 10px rgba(66, 153, 225, 0.5);
+        }
+
+        .login-button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            margin: 15px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="button-container" onclick="window.location.href='https://www.facebook.com/profile.php?id=61550533416731'">
+            <button class="info-button">معلوماتنا</button>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="header">تسجيل الدخول</div>
+        <h2>الرجاء إدخال اسم المستخدم</h2>
+        <form id="login-form" onsubmit="return validateForm()">
+            <input type="text" id="username" placeholder="اسم المستخدم" required>
+            <div class="error-message" id="error-message"></div>
+            <button type="submit" class="login-button">تسجيل الدخول</button>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const errorMessage = document.getElementById('error-message');
+
+            // تهيئة رسالة الخطأ
+            errorMessage.style.display = 'none';
+            errorMessage.textContent = '';
+
+            // تحقق من أن اسم المستخدم يتكون من 3 إلى 16 حرف
+            const usernamePattern = /^[A-Za-zأ-ي]{3,16}$/;
+
+            if (!usernamePattern.test(username)) {
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = "اسم المستخدم يجب أن يتكون من 3 إلى 16 حرف (عربي أو إنجليزي) دون أرقام أو رموز.";
+                return false;
+            }
+
+            // إذا كان كل شيء صحيحًا، يمكنك التوجيه إلى الصفحة الرئيسية
+            window.location.href = 'index.html'; // تأكد من أن هذا هو الرابط الصحيح للصفحة الرئيسية
+            return false; // لمنع تقديم النموذج
+        }
+    </script>
+</body>
+</html>

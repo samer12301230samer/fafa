@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل التحركات</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333;
+            margin: 0;
+            color: white;
+            position: relative;
+            background-size: cover;
+            transition: background 0.3s; /* لإظهار تغيير الخلفية بشكل سلس */
+        }
+
+        /* اهتزاز الخلفية */
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-1px, 0); } /* تقليل الاهتزاز */
+            50% { transform: translate(1px, 0); } /* تقليل الاهتزاز */
+            75% { transform: translate(-1px, 0); } /* تقليل الاهتزاز */
+        }
+
+        body.shake {
+            animation: shake 0.5s infinite; /* إضافة الاهتزاز */
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #00BFFF;
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        .top-bar:hover {
+            background-color: #1E90FF;
+        }
+
+        .top-bar:hover .button-container button {
+            background-color: #FFD700;
+            color: black;
+        }
+
+        .record-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(68, 68, 68, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            overflow-y: auto;
+            max-height: 70vh;
+            transition: opacity 0.5s;
+            opacity: 1;
+        }
+
+        .record-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .record-item {
+            background-color: #555;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+            background-color: red;
+        }
+
+        .settings-button, .hide-button, .logout-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            color: white;
+        }
+
+        .settings-button {
+            background-color: red;
+        }
+
+        .hide-button {
+            background-color: red;
+        }
+
+        .logout-button {
+            background-color: #FFD700; /* لون أصفر فاتح */
+            color: black; /* لون النص */
+        }
+
+        .logout-button:hover {
+            background-color: #FFC300; /* لون عند التمرير */
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .input-field.red {
+            background-color: #333;
+            color: white;
+        }
+
+        .save-button {
+            background-color: red; /* اللون الأحمر */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .save-button:hover {
+            background-color: darkred; /* اللون عند التمرير */
+        }
+
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            width: 300px;
+        }
+
+        .settings-button-item {
+            background-color: #444;
+            margin: 10px 0;
+            padding: 10px;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .settings-button-item:hover {
+            background-color: #555;
+        }
+
+        #backgroundInput {
+            margin-top: 10px;
+        }
+
+        .music-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .music-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 400px;
+            position: relative;
+            margin-top: 60px; /* سحب صندوق الأغنية أسفل الشريط العلوي */
+        }
+
+        .video-container {
+            margin-top: 20px;
+            border: 5px solid transparent; /* إطار شفاف افتراضي */
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+            width: 300px; /* لنجعل الحجم أصغر */
+            display: none; /* إخفاء الفيديو بشكل افتراضي */
+        }
+
+        .video-playing {
+            border: 5px solid pink; /* لون الزهري عندما يتم تشغيل الفيديو */
+            box-shadow: 0 0 20px pink; /* تأثير ظل للزيادة الجاذبية */
+        }
+
+        iframe {
+            width: 100%;
+            height: 200px; /* تقليل ارتفاع الفيديو قليلاً */
+            border: none; /* إزالة الحدود */
+        }
+
+        .owner-name {
+            display: none;
+            font-size: 24px;
+            color: gold;
+            text-shadow: 0 0 20px gold, 0 0 30px gold;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            border: 2px solid gold;
+            width: fit-content;
+            text-align: center;
+        }
+
+        .block-message {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: rgba(173, 216, 230, 0.8); /* لون أزرق فاتح */
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: black; /* لون نص */
+            z-index: 1001;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .countdown {
+            margin-top: 10px;
+            font-size: 20px;
+            color: black;
+        }
+
+        .mini-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(51, 51, 51, 0.8);
+            border-radius: 5px;
+            display: flex; /* جعل الزر مرئيًا منذ البداية */
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            z-index: 999;
+        }
+
+        .mini-player:hover {
+            transform: scale(1.1);
+        }
+
+        .mini-player-active {
+            width: 400px;
+            height: auto;
+            transition: width 0.3s, height 0.3s;
+            z-index: 999; /* Maintain z-index on active */
+        }
+
+        /* تصميم زر الموسيقى */
+        .music-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(51, 51, 51, 0.8);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            z-index: 999;
+        }
+
+        .music-button:hover {
+            background-color: lightblue; /* تغيير اللون إلى أزرق سماوي */
+            box-shadow: 0 0 15px rgba(173, 216, 230, 1); /* إضافة تأثير الإضاءة */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="button-container">
+            <button class="delete-button" onclick="showModal()">حذف السجل</button>  
+            <button class="settings-button" onclick="openSettings()">الإعدادات</button>
+            <button class="hide-button" onclick="toggleRecordVisibility()">إخفاء</button>
+            <button class="logout-button" onclick="logout()">خروج</button>
+        </div>
+    </div>
+
+    <div class="record-container" id="recordContainer">
+        <h2>سجل التحركات</h2>
+        <div id="recordList"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3>تأكيد حذف السجل</h3>
+            <input type="text" id="username" class="input-field red" placeholder="اسم المستخدم" />
+            <input type="password" id="password" class="input-field red" placeholder="كلمة المرور" />
+            <button class="save-button" onclick="deleteRecords()">حذف السجل</button>
+            <button class="save-button" onclick="saveCredentials()">حفظ المعلومات</button>
+            <button class="save-button" style="background-color: blue;" onclick="closeModal()">إغلاق</button> 
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <h3>الإعدادات</h3>
+            <div class="settings-button-item" onclick="changeBackground()">الخلفية</div>
+            <div class="settings-button-item" onclick="showControlOptions()">التحكم</div>
+            <div class="settings-button-item" onclick="showOwnerName()">مالك الموقع</div>
+            <div class="settings-button-item" onclick="openMusicBot()">بوت ميوزك</div>
+            <button class="save-button" onclick="closeSettings()">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="music-modal" id="musicModal">
+        <div class="music-content">
+            <h3>تشغيل الأغاني</h3>
+            <input type="text" id="musicInput" class="input-field" placeholder="أدخل رابط أو اسم الأغنية" />
+            <button class="save-button" id="playButton" onclick="playMusic()">تشغيل الأغنية</button>
+            <button class="save-button" style="background-color: blue;" onclick="closeMusicModal()">إغلاق</button>
+            <div class="video-container" id="videoContainer">
+                <iframe id="youtubePlayer" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="backgroundInput" style="display: none;" accept="image/*" onchange="setBackground(event)" />
+    <div class="owner-name" id="ownerName">samer</div>
+
+    <div class="block-message" id="blockMessage">
+        <h3>👨أنت محجوب👋</h3>
+        <p>العب غيرها يا أسد انتا <span class="countdown" id="countdown">30</span> ثانية.</p>
+    </div>
+
+    <div class="mini-player" id="miniPlayer" onclick="toggleMiniPlayer()">
+        <span class="music-button">🎵</span> <!-- استخدام الكلاس الجديد -->
+    </div>
+
+    <script>
+        let blockUser = false; // حالة حظر المستخدم
+        let attempts = 0; // عدد المحاولات
+        let blockUntil = null; // الوقت حتى يسمح للمستخدم بإدخال المعلومات مرة أخرى
+        let countdownTimer = null; // متغير لتخزين مؤقت العد التنازلي
+        const blockDuration = 30 * 1000; // فترة الحظر (30 ثانية)
+        let miniPlayerActive = false; // حالة الزر المصغر
+        let musicPlaying = false; // حالة الموسيقى
+
+        document.addEventListener('click', logClick);
+        document.addEventListener('keydown', logKeyPress);
+        document.addEventListener('scroll', logScroll);
+        document.addEventListener('input', logInputChange);
+
+        window.addEventListener('load', loadRecords);
+
+        function logClick(event) {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `ضغطت في [${event.clientX}, ${event.clientY}] في: ${dateTime}`;
+            saveRecord(record);
+        }
+
+        function logKeyPress(event) {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `تم الضغط على مفتاح "${event.key}" في: ${dateTime}`;
+            saveRecord(record);
+        }
+
+        function logScroll() {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `تم التمرير في الصفحة في: ${dateTime}`;
+            saveRecord(record);
+        }
+
+        function logInputChange(event) {
+            const now = new Date();
+            const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            const record = `تم تغيير حقل الإدخال: "${event.target.value}" في: ${dateTime}`;
+            saveRecord(record);
+        }
+
+        function saveRecord(record) {
+            let records = JSON.parse(localStorage.getItem('recordList')) || [];
+            records.push(record);
+            localStorage.setItem('recordList', JSON.stringify(records));
+            updateRecordList(records);
+        }
+
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('recordList')) || [];
+            updateRecordList(records);
+            loadBackground();
+
+            const savedUsername = localStorage.getItem('savedUsername');
+            const savedPassword = localStorage.getItem('savedPassword');
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
+            }
+            if (savedPassword) {
+                document.getElementById('password').value = savedPassword;
+            }
+
+            const isRecordHidden = localStorage.getItem('isRecordHidden') === 'true';
+            const recordContainer = document.getElementById('recordContainer');
+            if (isRecordHidden) {
+                recordContainer.classList.add('hidden');
+                document.querySelector('.hide-button').textContent = 'عرض'; 
+            } else {
+                document.querySelector('.hide-button').textContent = 'إخفاء';
+            }
+
+            const isModalVisible = localStorage.getItem('isModalVisible') === 'true';
+            if (isModalVisible) {
+                showModal();
+            }
+
+            // Load music state
+            const isMusicPlaying = localStorage.getItem('musicPlaying') === 'true';
+            if (isMusicPlaying) {
+                // Prevent opening music bot automatically
+            }
+        }
+
+        function loadBackground() {
+            const backgroundImage = localStorage.getItem('backgroundImage');
+            if (backgroundImage) {
+                document.body.style.backgroundImage = `url('${backgroundImage}')`;
+            }
+        }
+
+        function updateRecordList(records) {
+            const recordList = document.getElementById('recordList');
+            recordList.innerHTML = '';
+            records.forEach(record => {
+                const recordItem = document.createElement('div');
+                recordItem.className = 'record-item';
+                recordItem.textContent = record;
+                recordList.appendChild(recordItem);
+            });
+        }
+
+        function showModal() {
+            if (blockUser) {
+                displayBlockMessage();
+                return;
+            }
+
+            document.getElementById('modal').style.display = 'flex';
+            localStorage.setItem('isModalVisible', 'true');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            localStorage.removeItem('isModalVisible');
+        }
+
+        function displayBlockMessage() {
+            const blockMessage = document.getElementById('blockMessage');
+            blockMessage.style.display = 'block';
+            startCountdown(); // بدء العداد التنازلي
+        }
+
+        function startCountdown() {
+            let remainingTime = blockDuration / 1000; // الوقت المتبقي بالثواني
+            const countdownDisplay = document.getElementById('countdown');
+            countdownDisplay.textContent = remainingTime; // عرض الوقت المتبقي
+
+            countdownTimer = setInterval(() => {
+                remainingTime--;
+                countdownDisplay.textContent = remainingTime;
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('blockMessage').style.display = 'none'; // إخفاء الرسالة
+                    blockUser = false; // إلغاء الحظر
+                    attempts = 0; // إعادة تعيين عدد المحاولات
+                }
+            }, 1000); // تحديث كل ثانية
+        }
+
+        function deleteRecords() {
+            if (blockUser) {
+                displayBlockMessage();
+                return;
+            }
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'master' && password === '0569658832') {
+                const sound = new Audio('https://www.soundjay.com/button/sounds/button-3.mp3');
+                sound.play();
+                localStorage.removeItem('recordList');
+                document.getElementById('recordList').innerHTML = '';
+                alert('تم حذف السجل بنجاح!');
+                attempts = 0; // إعادة تعيين عدد المحاولات عند النجاح
+                closeModal();
+            } else {
+                attempts++;
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة.');
+
+                if (attempts >= 3) {
+                    blockUser = true;
+                    blockUntil = Date.now() + blockDuration; // حظر المستخدم لمدة 30 ثانية
+                    alert('لقد وصلت إلى الحد الأقصى من المحاولات. تم حظرك لمدة 30 ثانية.');
+                    closeModal();
+
+                    // بدء مؤقت لإلغاء الحظر بعد مرور الوقت
+                    setTimeout(() => {
+                        blockUser = false;
+                        attempts = 0; // إعادة تعيين عدد المحاولات بعد انتهاء الحظر
+                    }, blockDuration);
+                }
+            }
+        }
+
+        function saveCredentials() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            localStorage.setItem('savedUsername', username);
+            localStorage.setItem('savedPassword', password);
+            alert('تم حفظ المعلومات بنجاح!');
+        }
+
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function openMusicBot() {
+            document.getElementById('musicModal').style.display = 'flex';
+            localStorage.setItem('musicPlaying', 'true'); // Set music playing state
+        }
+
+        function closeMusicModal() {
+            document.getElementById('musicModal').style.display = 'none';
+            document.getElementById('videoContainer').style.display = 'none'; // إخفاء الفيديو عند إغلاق الموذج
+            document.getElementById('youtubePlayer').src = ''; // إعادة تعيين مصدر الفيديو
+            document.getElementById('videoContainer').classList.remove('video-playing'); // إزالة تأثير الحدود
+            musicPlaying = false; // إعادة تعيين حالة الموسيقى
+        }
+
+        function playMusic() {
+            const musicInput = document.getElementById('musicInput').value;
+            if (musicInput) {
+                const videoId = extractVideoId(musicInput);
+                if (videoId) {
+                    document.getElementById('youtubePlayer').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`; // تعيين مصدر فيديو يوتيوب مع تشغيل تلقائي
+                    document.getElementById('videoContainer').style.display = 'block'; // عرض الإطار
+                    document.getElementById('videoContainer').classList.add('video-playing'); // إضافة تأثير الحدود
+                    musicPlaying = true; // تغيير حالة الموسيقى
+                } else {
+                    alert('رجاءً أدخل رابط أو اسم أغنية صحيح.');
+                }
+            } else {
+                alert('رجاءً أدخل رابط أو اسم الأغنية.');
+            }
+        }
+
+        function extractVideoId(url) {
+            // باستخدام التعبير النمطي لاستخراج معرف الفيديو من رابط يوتيوب
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|watch(?:\?v=)|.+\?v=)|.*[?&]v=)|youtu\.be\/)([^&\n]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        function changeBackground() {
+            document.getElementById('backgroundInput').click();
+        }
+
+        function setBackground(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url('${e.target.result}')`;
+                    localStorage.setItem('backgroundImage', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showOwnerName() {
+            const ownerName = document.getElementById('ownerName');
+            ownerName.style.display = 'block';
+            setTimeout(() => {
+                ownerName.style.display = 'none';
+            }, 7000);
+        }
+
+        function showControlOptions() {
+            alert("خيارات التحكم ستظهر هنا لاحقًا.");
+        }
+
+        function toggleRecordVisibility() {
+            const recordContainer = document.getElementById('recordContainer');
+            const isHidden = recordContainer.classList.toggle('hidden');
+            const hideButton = document.querySelector('.hide-button');
+            hideButton.textContent = isHidden ? 'عرض' : 'إخفاء';
+
+            localStorage.setItem('isRecordHidden', isHidden);
+        }
+
+        // وظيفة الخروج
+        function logout() {
+            // هنا نستطيع إضافة بعض الإجراءات، ولكن لن نقوم بإغلاق الصوت بشكل فعلي
+            window.location.href = 'index.html'; // تنقل إلى صفحة 'index.html' عند الضغط على الخروج
+        }
+
+        // Check block time
+        setInterval(() => {
+            if (blockUser && Date.now() > blockUntil) {
+                blockUser = false; // إعادة تعيين حالة الحظر بعد انتهاء المدة
+                attempts = 0; // إعادة تعيين عدد المحاولات
+            }
+        }, 1000);
+
+        // Toggle Mini Player
+        function toggleMiniPlayer() {
+            const miniPlayer = document.getElementById('miniPlayer');
+            const musicModal = document.getElementById('musicModal');
+
+            miniPlayerActive = !miniPlayerActive;
+
+            if (miniPlayerActive) {
+                musicModal.classList.add('mini-player-active');
+            } else {
+                musicModal.classList.remove('mini-player-active');
+            }
+        }
+
+    </script>
+</body>
+</html>

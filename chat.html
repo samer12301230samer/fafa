@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دردشة فلسطينية</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #333;
+            background-image: url(''); /* خلفية افتراضية فارغة */
+            background-size: cover;
+        }
+
+        .navbar {
+            background-color: #FFCCCB;
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .back-button,
+        .mr-button,
+        .count-button,
+        .clear-button {
+            background-color: #FF5722;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        .back-button:hover,
+        .mr-button:hover,
+        .count-button:hover,
+        .clear-button:hover {
+            background-color: #E64A19;
+        }
+
+        .chat-display {
+            background-color: transparent;
+            color: white;
+            padding: 20px;
+            margin-top: 60px;
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            margin-bottom: 70px; /* إضافة المسافة لأسفل شريط الإدخال */
+        }
+
+        .message-input {
+            display: flex;
+            justify-content: space-between;
+            position: fixed;
+            bottom: 20px;
+            width: calc(100% - 40px);
+            padding: 0 20px;
+        }
+
+        .input-field {
+            flex-grow: 1;
+            border: 1px solid #bbb;
+            border-radius: 20px;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .send-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #43A047;
+        }
+
+        .editor-button {
+            background-color: #FFCC00; /* لون زر التحرير */
+            border: none;
+            color: black;
+            padding: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .editor-button:hover {
+            background-color: #FFD600; /* لون تغير الزر عند التمرير */
+        }
+
+        .editor-menu {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            padding: 10px;
+        }
+
+        .editor-menu button {
+            display: block;
+            background: #FF5722;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            margin: 5px 0; /* مسافة بين الأزرار */
+            cursor: pointer;
+        }
+
+        .editor-menu button:hover {
+            background-color: #E64A19;
+        }
+
+        .font-size-menu {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1002;
+            padding: 10px;
+        }
+
+        .font-size-menu label {
+            margin-right: 10px;
+        }
+
+        .bot-message {
+            background-color: #444; /* لون الخلفية للرسائل من البوت */
+            border-radius: 15px;
+            padding: 5px 10px; /* الحشو */
+            margin: 5px 0;
+            display: flex; /* عرض مرن */
+            align-items: center; /* محاذاة الوسط */
+            font-size: 28px; /* زيادة حجم الرسالة */
+        }
+
+        .bot-name-box {
+            background-color: lightblue; /* اللون الأزرق السماوي */
+            border-radius: 10px; /* شكل مستدير للصندوق */
+            padding: 5px 10px; /* إضافة حشو */
+            margin-right: 10px; /* مسافة بين الصندوق والرسالة */
+            font-size: 28px; /* حجم الخط */
+            color: black; /* لون النص */
+        }
+
+        .user-message {
+            /* إزالة الخلفية للرسائل المرسلة */
+            border-radius: 15px;
+            padding: 5px; /* تقليل الحشو */
+            margin: 5px 0; /* إضافة هامش */
+            display: block;
+            font-size: 28px; /* زيادة حجم خط الرسالة */
+            color: inherit; /* استخدام اللون المحدد */
+        }
+
+        .letter-b {
+            color: red;
+        }
+
+        .letter-o {
+            color: black;
+        }
+
+        .letter-t {
+            color: white;
+        }
+
+        .letter-s {
+            color: green;
+        }
+
+        .letter-a {
+            color: black;
+        }
+
+        .letter-m {
+            color: white;
+        }
+
+        .mr-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        .mr-menu button {
+            display: block;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            margin: 0;
+            text-align: left;
+        }
+
+        .mr-menu button:hover {
+            background-color: #45a049;
+        }
+
+        .wheel-container {
+            display: none; /* مخفية البداية */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border: 16px solid #FF5722;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .wheel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(#FF5722 0%, #FFCCCB 25%, #FF5722 50%, #FFCCCB 75%, #FF5722 100%);
+            transition: transform 4s ease-out;
+        }
+
+        .exit-game {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px; /* تقليل الحشوة */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px; /* حجم الزر */
+        }
+
+        /* إضافة تنسيق قائمة تحكم جديدة */
+        .control-menu {
+            display: none;
+            position: fixed; /* تحريك القائمة إلى مركز الصفحة */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(173, 216, 230, 0.9); /* اللون الأزرق السماوي مع شفافية */
+            border-radius: 10px;
+            padding: 20px; /* إضافة حشو */
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5); /* لمعة مضيئة */
+            z-index: 1001;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .control-menu:hover {
+            box-shadow: 0 0 30px rgba(0, 191, 255, 0.8); /* تأثير اللمعان عند التمرير فوق القائمة */
+        }
+
+        .control-menu input {
+            padding: 5px; /* تقليل الحشو */
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: calc(100% - 30px); /* عرض كامل مع تقليل المساحة للطول */
+            display: inline-block; /* عرض داخلي */
+            font-size: 14px; /* حجم نص أصغر */
+        }
+
+        .control-menu button {
+            display: block;
+            background: #FF5722;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .control-menu button:hover {
+            background-color: #E64A19;
+        }
+
+        .close-button {
+            background: transparent;
+            border: none;
+            color: red;
+            font-size: 12px; /* حجم الزر */
+            cursor: pointer;
+            float: right; /* محاذاة إلى اليمين */
+            margin-left: 5px; /* مسافة يسارية صغيرة */
+            padding: 2px 5px; /* إضافة حشوة صغيرة */
+            border-radius: 5px; /* شكل الزر */
+        }
+
+        .close-button:hover {
+            background-color: rgba(255, 0, 0, 0.2); /* تأثير خلفية عند التمرير فوق الزر */
+        }
+
+        .color-picker {
+            display: none; /* مخفية في البداية */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(173, 216, 230, 0.9);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+            z-index: 1001;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .save-button,
+        .cancel-button {
+            margin-top: 10px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .save-button:hover,
+        .cancel-button:hover {
+            background-color: #43A047;
+        }
+
+        .shadow-button {
+            margin-top: 10px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .shadow-button:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <button class="back-button" onclick="goBack()">الرجوع للخلف</button>
+        <button class="mr-button" onclick="toggleMRMenu()">MR</button>
+        <button class="count-button" onclick="showMessageCount()">عدد الرسائل</button>
+        <button class="clear-button" onclick="clearMessages()">مسح النص</button>
+    </div>
+
+    <div class="chat-display" id="chatDisplay">
+        <!-- سيتم إضافة الرسائل هنا -->
+    </div>
+
+    <div class="message-input">
+        <input type="text" class="input-field" id="messageInput" placeholder="اكتب رسالتك هنا..." onkeypress="checkEnter(event)">
+        <button class="editor-button" onclick="toggleEditorMenu()">✍️</button> <!-- زر تحرير -->
+        <button class="send-button" onclick="sendMessage()">إرسال</button>
+    </div>
+
+    <div class="editor-menu" id="editorMenu">
+        <button onclick="openFontSizeMenu()">تكبير الخط</button>
+        <button onclick="toggleItalic()">إضافة خط مائل</button>
+        <button onclick="addShadow()">إضافة ظل ذهبي</button>
+        <button onclick="changeFontStyle()">تغيير نمط الخط</button>
+        <button onclick="hideEditorMenu()">إغلاق القائمة</button>
+    </div>
+
+    <div class="font-size-menu" id="fontSizeMenu">
+        <label for="fontSizeSelect">اختر حجم الخط من 1 إلى 30:</label>
+        <select id="fontSizeSelect">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+        </select>
+        <button onclick="setFontSize()">حفظ</button>
+        <button onclick="hideFontSizeMenu()">رجوع</button>
+    </div>
+
+    <div class="mr-menu" id="mrMenu">
+        <button onclick="showControl()">تحكم</button>
+        <button onclick="showBackground()">خلفية</button>
+        <button onclick="showTextColorPicker()">اختر لون النص</button>
+        <button onclick="showGame()">لعبة احترافية</button>
+    </div>
+
+    <div class="control-menu" id="controlMenu">
+        <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور">
+        <button class="close-button" onclick="hideControl()">✖</button>
+        <button onclick="clearMessages()">حذف الرسائل</button>
+    </div>
+
+    <div class="wheel-container" id="wheelContainer">
+        <div class="wheel" id="wheel"></div>
+        <button class="exit-game" id="exitGame" onclick="exitGame()">خروج من اللعبة</button>
+    </div>
+
+    <div class="color-picker" id="colorPicker">
+        <div class="color-option" style="background-color: #FF0000;" onclick="selectColor('#FF0000')"></div>
+        <div class="color-option" style="background-color: #FF7F00;" onclick="selectColor('#FF7F00')"></div>
+        <div class="color-option" style="background-color: #FFFF00;" onclick="selectColor('#FFFF00')"></div>
+        <div class="color-option" style="background-color: #7FFF00;" onclick="selectColor('#7FFF00')"></div>
+        <div class="color-option" style="background-color: #00FF00;" onclick="selectColor('#00FF00')"></div>
+        <div class="color-option" style="background-color: #00FF7F;" onclick="selectColor('#00FF7F')"></div>
+        <div class="color-option" style="background-color: #00FFFF;" onclick="selectColor('#00FFFF')"></div>
+        <div class="color-option" style="background-color: #007FFF;" onclick="selectColor('#007FFF')"></div>
+        <div class="color-option" style="background-color: #0000FF;" onclick="selectColor('#0000FF')"></div>
+        <div class="color-option" style="background-color: #7F00FF;" onclick="selectColor('#7F00FF')"></div>
+        <div class="color-option" style="background-color: #FF00FF;" onclick="selectColor('#FF00FF')"></div>
+        <div class="color-option" style="background-color: #000000;" onclick="selectColor('#000000')"></div>
+        <div class="color-option" style="background-color: #FFFFFF;" onclick="selectColor('#FFFFFF')"></div>
+
+        <button class="shadow-button" onclick="applyShadow()">ظلال</button>
+        <button class="save-button" onclick="saveColor()">حفظ اللون</button>
+        <button class="cancel-button" onclick="cancelColorPicker()">إلغاء</button>
+    </div>
+
+    <script>
+        let selectedColor = ''; // تخزين اللون المختار
+        let isItalic = false; // حالة الخط المائل
+        let fontSize = 16; // حجم الخط الحالي
+        let messageCount = 0; // عداد الرسائل
+        let botMessageCount = localStorage.getItem('botMessageCount') ? parseInt(localStorage.getItem('botMessageCount')) : 0; // عداد رسائل البوت
+        const messages = []; // مصفوفة لتخزين الرسائل
+
+        // استرجاع الرسائل عند تحميل الصفحة
+        window.onload = function() {
+            const storedMessages = JSON.parse(localStorage.getItem('chatMessages'));
+            if (storedMessages) {
+                storedMessages.forEach(msg => {
+                    addUserMessage(msg.text, msg.color, msg.fontSize, msg.fontStyle);
+                });
+                messageCount = storedMessages.length;
+            }
+        };
+
+        function goBack() {
+            window.location.href = "index.html"; // الانتقال إلى الصفحة الرئيسية
+        }
+
+        function toggleMRMenu() {
+            const menu = document.getElementById('mrMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleEditorMenu() {
+            const menu = document.getElementById('editorMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function hideEditorMenu() {
+            document.getElementById('editorMenu').style.display = 'none'; // إخفاء القائمة
+        }
+
+        function openFontSizeMenu() {
+            document.getElementById('fontSizeMenu').style.display = 'block'; // إظهار قائمة حجم الخط
+        }
+
+        function hideFontSizeMenu() {
+            document.getElementById('fontSizeMenu').style.display = 'none'; // إخفاء قائمة حجم الخط
+        }
+
+        function setFontSize() {
+            const selectedValue = document.getElementById('fontSizeSelect').value;
+            fontSize = parseInt(selectedValue) * 2; // تحويل القيمة إلى حجم خط مناسب
+            document.querySelector('.input-field').style.fontSize = `${fontSize}px`; // تطبيق الحجم
+            hideFontSizeMenu(); // إغلاق القائمة بعد الحفظ
+        }
+
+        function showControl() {
+            const controlMenu = document.getElementById('controlMenu');
+            controlMenu.style.display = controlMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function hideControl() {
+            document.getElementById('controlMenu').style.display = 'none';
+        }
+
+        function clearMessages() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === "123456") {
+                messageCount = 0; // إعادة تعيين عدد الرسائل
+                botMessageCount = 0; // إعادة تعيين عدد رسائل البوت
+                messages.length = 0; // تفريغ مصفوفة الرسائل
+                localStorage.removeItem('chatMessages'); // مسح الرسائل من التخزين
+                localStorage.removeItem('botMessageCount'); // مسح عدد رسائل البوت
+                document.getElementById("chatDisplay").innerHTML = ""; // مسح الرسائل
+                hideControl(); // إخفاء القائمة
+            } else {
+                alert("كلمة المرور غير صحيحة!");
+            }
+        }
+
+        function showTextColorPicker() {
+            document.getElementById('colorPicker').style.display = 'block'; // إظهار واجهة اختيار اللون
+        }
+
+        function selectColor(color) {
+            selectedColor = color; // تعيين اللون المحدد
+            document.querySelector('.input-field').style.color = selectedColor; // تغيير لون النص مباشرةً عند التحديد
+        }
+
+        function applyShadow() {
+            if (selectedColor) {
+                document.querySelector('.input-field').style.textShadow = `2px 2px 5px ${selectedColor}`; // تطبيق الظل
+            }
+        }
+
+        function addShadow() {
+            document.querySelector('.input-field').style.textShadow = `2px 2px 5px gold`; // إضافة ظل ذهبي
+        }
+
+        function increaseFontSize() {
+            openFontSizeMenu(); // فتح قائمة اختيار حجم الخط
+        }
+
+        function toggleItalic() {
+            isItalic = !isItalic; // عكس حالة الخط المائل
+            document.querySelector('.input-field').style.fontStyle = isItalic ? 'italic' : 'normal'; // تطبيق الخط المائل
+        }
+
+        function changeFontStyle() {
+            // تغيير نمط الخط إلى نمط مخصص (يمكن إضافة أنماط أكثر)
+            const styles = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
+            const selectedStyle = styles[Math.floor(Math.random() * styles.length)];
+            document.querySelector('.input-field').style.fontFamily = selectedStyle; // تغيير نمط الخط
+        }
+
+        function saveColor() {
+            document.querySelector('.input-field').style.color = selectedColor; // تغيير لون النص
+            document.getElementById('colorPicker').style.display = 'none'; // إخفاء واجهة اختيار اللون
+        }
+
+        function cancelColorPicker() {
+            document.getElementById('colorPicker').style.display = 'none'; // إخفاء واجهة اختيار اللون
+        }
+
+        function showGame() {
+            const wheelContainer = document.getElementById("wheelContainer");
+            wheelContainer.style.display = "block";
+            const wheel = document.getElementById("wheel");
+            wheel.style.transform = `rotate(${Math.random() * 360 + 720}deg)`; // تدوير العجلة عشوائيًا
+        }
+
+        function exitGame() {
+            const wheelContainer = document.getElementById("wheelContainer");
+            wheelContainer.style.display = "none"; // إخفاء العجلة
+        }
+
+        let lastBotMessage = ""; // متغير لتخزين آخر رسالة للبوت
+
+        // قائمة الكلمات المسيئة باستخدام Set للسماح بإضافة عدد غير محدود من الكلمات
+        const offensiveWords = new Set([
+            "امك",
+            "ابوك",
+            "نتن",
+            "احمق",
+            "غبي",
+            "مجنون",
+            "عميل",
+            "جبان"
+            // يمكنك إضافة المزيد من الكلمات هنا، بشكل غير محدود
+        ]);
+
+        function addUserMessage(text, color, fontSize, fontStyle) {
+            const chatDisplay = document.getElementById("chatDisplay");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("user-message");
+            messageElement.textContent = text;
+            messageElement.style.color = color || 'white'; // استخدام اللون المحدد أو الأبيض
+            messageElement.style.textShadow = `2px 2px 5px ${color}`; // إضافة الظل
+            messageElement.style.fontSize = `${fontSize}px`; // تطبيق حجم الخط
+            messageElement.style.fontStyle = fontStyle; // تطبيق الخط المائل
+
+            chatDisplay.appendChild(messageElement);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight; // التمرير لأسفل تلقائيًا
+        }
+
+        function addBotMessage(text) {
+            // تحقق مما إذا كانت الرسالة هي نفسها الرسالة الأخيرة
+            if (text === lastBotMessage) {
+                return; // لا تفعل شيئًا إذا كانت الرسالة مكررة
+            }
+
+            const chatDisplay = document.getElementById("chatDisplay");
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("bot-message");
+
+            const botNameElement = document.createElement("div");
+            botNameElement.classList.add("bot-name-box");
+            botNameElement.innerHTML =
+                '<span class="letter-b">B</span>' +
+                '<span class="letter-o">O</span>' +
+                '<span class="letter-t">T</span>' +
+                '<span class="letter-s">S</span>' +
+                '<span class="letter-a">A</span>' +
+                '<span class="letter-m">M</span>'; // اسم البوت
+
+            const botTextElement = document.createElement("span");
+            botTextElement.innerText = ": " + text; // إضافة ":" قبل النص
+
+            // إضافة اسم البوت والنص إلى عنصر الرسالة
+            messageElement.appendChild(botNameElement);
+            messageElement.appendChild(botTextElement);
+            chatDisplay.appendChild(messageElement);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight; // التمرير لأسفل تلقائيًا
+
+            lastBotMessage = text; // تحديث الرسالة الأخيرة
+            botMessageCount++; // زيادة عداد رسائل البوت
+            localStorage.setItem('botMessageCount', botMessageCount); // حفظ عدد رسائل البوت
+            messages.push({ text, color: 'white', fontSize: 28, fontStyle: 'normal' }); // حفظ الرسالة في المصفوفة
+            localStorage.setItem('chatMessages', JSON.stringify(messages)); // حفظ الرسائل في التخزين
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById("messageInput");
+            const message = inputField.value.trim();
+
+            if (message) {
+                // تحقق من الكلمات المسيئة
+                if (Array.from(offensiveWords).some(word => message.includes(word))) {
+                    alert("تم استخدام كلمة مسيئة. سيتم إرجاعك.");
+                    goBack(); // استدعاء دالة الرجوع عند اكتشاف كلمة مسيئة
+                    return; // الخروج من الدالة
+                }
+
+                addUserMessage(message, selectedColor, fontSize, isItalic ? 'italic' : 'normal'); // إضافة الرسالة من المستخدم
+                messages.push({ text: message, color: selectedColor, fontSize, fontStyle: isItalic ? 'italic' : 'normal' }); // حفظ الرسالة في المصفوفة
+                localStorage.setItem('chatMessages', JSON.stringify(messages)); // حفظ الرسائل في التخزين
+                inputField.value = ""; // إعادة حقل الإدخال إلى فارغ
+
+                messageCount++; // زيادة عداد الرسائل بعد إرسال رسالة جديدة
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // منع الانتقال إلى السطر التالي
+                sendMessage(); // استدعاء دالة إرسال الرسالة
+            }
+        }
+
+        const botMessages = [
+            "🌸اللّهُـمَّ بِكَ أَصْـبَحْنا وَبِكَ أَمْسَـينا ، وَبِكَ نَحْـيا وَبِكَ نَمُـوتُ وَإِلَـيْكَ النُّـشُور🌸",
+            "🌺اللّهُـمَّ عافِـني في بَدَنـي ، اللّهُـمَّ عافِـني في سَمْـعي ، اللّهُـمَّ عافِـني في بَصَـري ، لا إلهَ إلاّ أَنْـتَ🌺",
+            "🌺اللّهُـمَّ إِنّـي أَعـوذُ بِكَ مِنَ الْكُـفر ، وَالفَـقْر ، وَأَعـوذُ بِكَ مِنْ عَذابِ القَـبْر ، لا إلهَ إلاّ أَنْـتَ🌺",
+            "🌺أَعـوذُ بِكَلِمـاتِ اللّهِ التّـامّـاتِ مِنْ شَـرِّ ما خَلَـق🌺",
+            "🌺اللَّهُمَّ إِنَّا نَعُوذُ بِكَ مِنْ أَنْ نُشْرِكَ بِكَ شَيْئًا نَعْلَمُهُ ، وَنَسْتَغْفِرُكَ لِمَا لَا نَعْلَمُهُ🌺",
+            "🌺أسْتَغْفِرُ اللهَ العَظِيمَ الَّذِي لاَ إلَهَ إلاَّ هُوَ، الحَيُّ القَيُّومُ، وَأتُوبُ إلَيهِ🌺",
+            "🌺يَا رَبِّ , لَكَ الْحَمْدُ كَمَا يَنْبَغِي لِجَلَالِ وَجْهِكَ , وَلِعَظِيمِ سُلْطَانِكَ🌺",
+            "🌺اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا🌺",
+            "🌺لَا إلَه إلّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ🌺",
+            "🌺رَضيـتُ بِاللهِ رَبَّـاً وَبِالإسْلامِ ديـناً وَبِمُحَـمَّدٍ صلى الله عليه وسلم نَبِيّـاً🌺",
+            "🌺حَسْبِـيَ اللّهُ لا إلهَ إلاّ هُوَ عَلَـيهِ تَوَكَّـلتُ وَهُوَ رَبُّ العَرْشِ العَظـيم🌺",
+            "🌺سُبْحـانَ اللهِ وَبِحَمْـدِهِ عَدَدَ خَلْـقِه ، وَرِضـا نَفْسِـه ، وَزِنَـةَ عَـرْشِـه ، وَمِـدادَ كَلِمـاتِـه🌺",
+            "🌺اللّهُـمَّ عافِـني في بَدَنـي ، اللّهُـمَّ عافِـني في سَمْـعي ، اللّهُـمَّ عافِـني في بَصَـري ، لا إلهَ إلاّ أَنْـتَ🌺",
+            "🌺أَعـوذُ بِكَلِمـاتِ اللّهِ التّـامّـاتِ مِنْ شَـرِّ ما خَلَـق🌺",
+            "🌺لا إله إلا الله محمد رسول الله🌺",
+            "🌺صل على النبي يا مدردش🌺",
+            "🌺أياك وأن تنسى الصلاة🌺",
+            "🌺اذكر الله الحي القيوم🌺",
+        ];
+
+        function showMessageCount() {
+            alert("عدد الرسائل المرسلة: " + messageCount + "\nعدد رسائل البوت: " + botMessageCount); // إظهار عدد الرسائل
+        }
+
+        function startBot() {
+            setInterval(() => {
+                const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+                addBotMessage(randomMessage);
+            }, 5); // كل 1.0.0 ثوان
+        }
+
+        startBot();
+    </script>
+</body>
+
+</html>
